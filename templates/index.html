@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video to Ascii</title>
+  <style>
+    body {
+      font-family: monospace;
+      margin-top: 4rem;
+    }
+
+    .container {
+      max-width: 64rem;
+      width: fit-content;
+      margin: auto;
+    }
+
+    #player {
+      background-color: rgb(26, 26, 26);
+      color: antiquewhite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      border-radius: 0.5rem;
+    }
+
+    #player__frame {
+      white-space: pre-wrap;
+      width: fit-content;
+    }
+  </style>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h1>AsciiVideo Player</h1>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <div id="player">
+            <canvas width="2500" height="1000" id="player__frame"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    //https://github.com/WICG/video-editing
+    var url_string = window.location.href;
+    var url = new URL(url_string);
+    var video = url.searchParams.get("video");
+    var speed = 50
+    console.log(video);
+
+    var canvas = document.getElementById("player__frame");
+    var ctx = canvas.getContext("2d");
+    ctx.font = "12px monospace";
+    ctx.fillStyle = "white";
+    $.getJSON("json/" + video + ".json", function (json) {
+      const frames = json.length;
+      var current_frame = 0;
+      var playing = true;
+
+      function printFrame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var x = 30;
+        var y = 30;
+        var lineheight = 15;
+
+        var lines = json[current_frame].split('\n');
+
+        for (var i = 0; i < lines.length; i++)
+          ctx.fillText(lines[i], x, y + (i * lineheight));
+
+        requestAnimationFrame(updateFrame);
+      }
+
+      function updateFrame() {
+        if (current_frame == frames - 1) {
+          current_frame = 0;
+        } else {
+          current_frame += 1;
+        }
+
+        printFrame();
+      }
+
+      printFrame();
+
+      var interval = requestAnimationFrame(updateFrame);
+    });
+
+  </script>
+</body>
+
+</html>
